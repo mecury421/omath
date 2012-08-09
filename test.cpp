@@ -1,0 +1,153 @@
+#include <iostream>
+#include <cassert>
+#include "U33.h"
+
+typedef unsigned long long U64;
+
+static const U64 MASK33(0x1ffffffff);
+static const U64 MASK32(0x0ffffffff);
+static const bool DumpAll(false);
+
+using namespace std;
+
+U33 convert(const U64& ref)
+{
+    U64 val(ref);
+
+    // do 33bit mask
+    val &= MASK33;
+
+    const unsigned int msb   = (val & 0x100000000) ? 1 : 0;
+    const unsigned int lsb32 = static_cast<unsigned int>(val & MASK32);
+
+    return U33(msb,lsb32);
+}
+
+U64 convert(const U33& ref)
+{
+    unsigned int msb17(0);
+    unsigned int lsb16(0);
+
+    // get the raw values
+    ref.getRaw(msb17,lsb16);
+
+    U64 value(0);
+
+    value |= (static_cast<U64>(lsb16 & 0xffff) <<  0);
+    value |= (static_cast<U64>(msb17 & 0xffff) << 16);
+
+    if (msb17 & 0x10000)
+        value |= 0x100000000;
+
+    return value;
+}
+
+void checkAddition(U64 a, U64 b)
+{
+    const U64 expectedValue = (a + b) & MASK33;
+
+    // convert the 64bit numbers to 33 bits
+    const U33 a33 = convert(a);
+    const U33 b33 = convert(b);
+
+    // do the addition
+    const U33 result33 = a33 + b33;
+
+    // convert the result
+    const U64 result = convert(result33);
+
+    // check the result
+    const bool success = (result == expectedValue);
+
+    // check for the lack of sweet success
+    if (!success || DumpAll)
+    {
+        cout << "==============================================================" << endl;
+        cout << "DUMP ADDITION" << endl;
+        cout << "==============================================================" << endl;
+        cout << "a              : 0x" << hex << a << endl;
+        cout << "b              : 0x" << hex << b << endl;
+        cout << "expectedValue  : 0x" << hex << expectedValue << endl;
+        cout << "a33            : " << a33 << endl;
+        cout << "b33            : " << b33 << endl;
+        cout << "result33       : " << result33 << endl;
+        cout << "result         : 0x" << hex << result << endl;
+        cout << "success        : " << boolalpha << success << endl;
+        cout << "==============================================================" << endl << endl;
+    }
+
+    assert(success);
+}
+
+void checkSubtraction(U64 a, U64 b)
+{
+    ///----------------------------------------------------------------
+    U64 expectedValue = (a >= b) ? (a - b) : (((MASK33) - b) + a + 1);
+    if (b)
+    {
+        if (a >= b)
+        {
+            expectedValue = a - b;
+        }
+        else
+        {
+            expectedValue = (MASK33 - (b - 1)) + a;
+        }
+    }
+    else
+    {
+        expectedValue = a;
+    }
+    ///----------------------------------------------------------------
+
+    // convert the 64bit numbers to 33 bits
+    const U33 a33 = convert(a);
+    const U33 b33 = convert(b);
+
+    // do the addition
+    const U33 result33 = a33 - b33;
+
+    // convert the result
+    const U64 result = convert(result33);
+
+    // check the result
+    const bool success = (result == expectedValue);
+
+    // check for the lack of sweet success
+    if (!success || DumpAll)
+    {
+        cout << "==============================================================" << endl;
+        cout << "DUMP SUBTRACTION" << endl;
+        cout << "==============================================================" << endl;
+        cout << "a              : 0x" << hex << a << endl;
+        cout << "b              : 0x" << hex << b << endl;
+        cout << "expectedValue  : 0x" << hex << expectedValue << endl;
+        cout << "a33            : " << a33 << endl;
+        cout << "b33            : " << b33 << endl;
+        cout << "result33       : " << result33 << endl;
+        cout << "result         : 0x" << hex << result << endl;
+        cout << "success        : " << boolalpha << success << endl;
+        cout << "==============================================================" << endl << endl;
+    }
+
+    assert(success);
+}
+
+int main()
+{
+    checkAddition(0x1, 0x1);
+    checkAddition(0x1ffffffff, 0x1);
+    checkAddition(0x1, 0x1ffffffff);
+    checkAddition(0x1ffffffff, 0x1ffffffff);
+    checkAddition(0, 0);
+
+    checkSubtraction(0x1, 0x1);
+    checkSubtraction(0x1ffffffff, 0x1);
+    checkSubtraction(0x1, 0x1ffffffff);
+    checkSubtraction(0x1ffffffff, 0x1ffffffff);
+    checkSubtraction(0, 0);
+
+    cout << "Sweet success!" << endl;
+
+    return 0;
+}
