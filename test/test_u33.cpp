@@ -25,7 +25,7 @@
 //------------------------------------------------------------------------------
 
 #include <iostream>
-#include <cassert>
+#include <stdexcept>
 #include "U33.h"
 
 typedef unsigned long long U64;
@@ -102,7 +102,10 @@ void checkAddition(U64 a, U64 b)
         cout << "==============================================================" << endl << endl;
     }
 
-    assert(success);
+    if (!success)
+    {
+        throw std::logic_error("Test failure");
+    }
 }
 
 void checkSubtraction(U64 a, U64 b)
@@ -156,7 +159,10 @@ void checkSubtraction(U64 a, U64 b)
         cout << "==============================================================" << endl << endl;
     }
 
-    assert(success);
+    if (!success)
+    {
+        throw std::logic_error("Test failure");
+    }
 }
 
 int main()
