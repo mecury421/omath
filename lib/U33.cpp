@@ -185,7 +185,7 @@ U33 U33::operator-(const U33& ref) const
     U33 newValue(*this);
 
     // check for the simple case
-    if (newValue >= ref)
+    if (ref <= newValue)
     {
         // simple deduction
         newValue.mMsb17 -= ref.mMsb17;
