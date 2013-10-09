@@ -166,12 +166,14 @@ int main()
     checkAddition(0x1, 0x1ffffffff);
     checkAddition(0x1ffffffff, 0x1ffffffff);
     checkAddition(0, 0);
+    checkAddition(1234567, 1111111);
 
     checkSubtraction(0x1, 0x1);
     checkSubtraction(0x1ffffffff, 0x1);
     checkSubtraction(0x1, 0x1ffffffff);
     checkSubtraction(0x1ffffffff, 0x1ffffffff);
     checkSubtraction(0, 0);
+    checkSubtraction(1234567, 1111111);
 
     cout << "Sweet success!" << endl;
 

@@ -42,16 +42,17 @@ using namespace std;
 
 /// @name Constants
 /// @{
-static const unsigned int   MASK_32BIT  (0xffffffff);
-static const unsigned int   MASK_17BIT  (0x1ffff);
-static const unsigned int   MASK_16BIT  (0xffff);
-static const unsigned int   MASK_1BIT   (0x1);
-static const unsigned int   BIT17       (0x10000);
-static const unsigned int   ONE         (1);
-static const unsigned int   ZERO        (0);
-static const int            MINUS_ONE   (-1);
-static const U33            MAX33       (ONE,MASK_32BIT);
-static const U33            ONE33       (ZERO,ONE);
+static const unsigned int   MASK_OVERFLOW   (0x80000000);
+static const unsigned int   MASK_32BIT      (0xffffffff);
+static const unsigned int   MASK_17BIT      (0x1ffff);
+static const unsigned int   MASK_16BIT      (0xffff);
+static const unsigned int   MASK_1BIT       (0x1);
+static const unsigned int   BIT17           (0x10000);
+static const unsigned int   ONE             (1);
+static const unsigned int   ZERO            (0);
+static const int            MINUS_ONE       (-1);
+static const U33            MAX33           (ONE,MASK_32BIT);
+static const U33            ONE33           (ZERO,ONE);
 /// @}
 
 //------------------------------------------------------------------------------
@@ -189,6 +190,13 @@ U33 U33::operator-(const U33& ref) const
         // simple deduction
         newValue.mMsb17 -= ref.mMsb17;
         newValue.mLsb16 -= ref.mLsb16;
+
+        // check overflow
+        if (newValue.mLsb16 & MASK_OVERFLOW)
+        {
+            newValue.mMsb17 -= 1;
+            newValue.mLsb16 &= MASK_16BIT;
+        }
     }
     else
     {
